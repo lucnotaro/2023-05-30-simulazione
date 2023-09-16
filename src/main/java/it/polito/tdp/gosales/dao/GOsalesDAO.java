@@ -109,5 +109,80 @@ public class GOsalesDAO {
 		}
 	}
 	
+	public List<String> getAllCountry(){
+		String query = "SELECT DISTINCT r.Country "
+				+ "FROM go_retailers r "
+				+ "ORDER BY r.Country ASC";
+		List<String> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(query);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getString("Country"));
+			}
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+	}
+	
+	public List<Retailers> getRetailersOf(String country){
+		String query = "SELECT DISTINCT * "
+				+ "FROM go_retailers r "
+				+ "WHERE r.Country=?";
+		List<Retailers> result = new ArrayList<Retailers>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(query);
+			st.setString(1,country);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(new Retailers(rs.getInt("Retailer_code"), 
+						rs.getString("Retailer_name"),
+						rs.getString("Type"), 
+						rs.getString("Country")));
+			}
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+		
+	}
+	
+	public List<Integer> getProductOfIn(String c,Integer y,Integer id){
+		String query = "SELECT DISTINCT s.Product_number AS p_id "
+				+ "FROM go_retailers r,go_daily_sales s "
+				+ "WHERE r.Country=? AND YEAR(s.Date)=? AND r.Retailer_code=s.Retailer_code AND r.Retailer_code=?";
+		List<Integer> result = new ArrayList<>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(query);
+			st.setString(1,c);
+			st.setInt(2,y);
+			st.setInt(3,id);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getInt("p_id"));
+			}
+			conn.close();
+			return result;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
 	
 }
